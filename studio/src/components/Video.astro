@@ -1,0 +1,42 @@
+---
+import { media } from '../utils/media';
+const { source, poster, title } = Astro.props as { source:string; poster:string; title:string };
+---
+<video-preview data-source={media(source)}>
+  <a class="button light play-trigger" href={media(source)}><span aria-hidden="true">▶</span> 播放演示</a>
+  <dialog aria-label={`播放${title}`}>
+    <div class="video-top"><strong>{title}</strong><form method="dialog"><button class="button light" type="submit">关闭</button></form></div>
+    <video controls playsinline preload="none" poster={media(poster)} aria-label={title}></video>
+    <p class="video-error" hidden>视频未能载入。<a href={media(source)}>直接打开视频文件</a></p>
+  </dialog>
+</video-preview>
+<script>
+  class VideoPreview extends HTMLElement {
+    connectedCallback() {
+      const trigger = this.querySelector('a');
+      const dialog = this.querySelector('dialog');
+      const video = this.querySelector('video');
+      const error = this.querySelector<HTMLParagraphElement>('.video-error');
+      const source = this.dataset.source;
+      if (!trigger || !dialog || !video || !error || !source) return;
+      video.onwaiting = () => { error.hidden = true; };
+      video.onerror = () => { if (dialog.open) error.hidden = false; };
+      trigger.onclick = event => {
+        if (!dialog.showModal) return;
+        event.preventDefault();
+        dialog.showModal();
+        error.hidden = true;
+        video.src = source;
+        void video.play().catch(() => {});
+      };
+      dialog.onclick = event => { if (event.target === dialog) dialog.close(); };
+      dialog.onclose = () => {
+        video.pause();
+        video.removeAttribute('src');
+        video.load();
+        trigger.focus();
+      };
+    }
+  }
+  if (!customElements.get('video-preview')) customElements.define('video-preview', VideoPreview);
+</script>

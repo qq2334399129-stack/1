@@ -1,0 +1,15 @@
+---
+import Base from '../../layouts/Base.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import Filters from '../../components/Filters.astro';
+import ContactBand from '../../components/ContactBand.astro';
+import { projects, categories } from '../../data/projects';
+---
+<Base title="作品集" description="浏览 AI 商业广告、漫剧、电影短片、产品宣传与视觉设计的概念样稿。">
+  <section class="shell page-heading"><p class="eyebrow">PORTFOLIO</p><h1>作品集</h1><p>影像、广告与视觉设计的探索。当前展出内容均为概念样稿。</p></section>
+  <section class="shell listing" aria-label="作品列表">
+    <Filters values={categories} all="全部作品" label="按作品分类筛选" />
+    <div class="work-grid">{projects.map(project => <ProjectCard project={project} />)}</div>
+  </section>
+  <ContactBand />
+</Base>

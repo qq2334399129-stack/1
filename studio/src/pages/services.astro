@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro';
+import ContactBand from '../components/ContactBand.astro';
+import { services } from '../data/services';
+---
+<Base title="服务" description="AI 商业广告、产品宣传、漫剧、电影感短片、视觉设计和视频定制服务。">
+  <section class="shell page-heading"><p class="eyebrow">SERVICES</p><h1>创作服务</h1><p>从创意构思到交付，按项目的目标、渠道与制作范围定制方案和报价。</p></section>
+  <div class="shell service-page">
+    <nav class="service-index" aria-label="服务目录">{services.map(service => <a href={`#${service.id}`}>{service.title}</a>)}</nav>
+    <div>{services.map(service => <section id={service.id} class="service-detail" data-reveal>
+      <h2>{service.title}</h2><p>{service.description}</p>
+      <dl><dt>交付内容</dt><dd>{service.deliverables}</dd><dt>适用客户</dt><dd>{service.audience}</dd></dl>
+      <h3>合作流程</h3><ol>{service.workflow.map(step => <li>{step}</li>)}</ol>
+      <a class="button outline" href={`/contact/?service=${encodeURIComponent(service.id)}`}>咨询这项服务</a>
+    </section>)}</div>
+  </div>
+  <ContactBand />
+</Base>

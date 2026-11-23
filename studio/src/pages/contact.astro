@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro';
+import { site } from '../data/site';
+---
+<Base title="联系" description="通过邮件联系留帧工作室，咨询 AI 影像、商业广告和视觉设计合作。">
+  <section class="shell page-heading contact-page">
+    <p class="eyebrow">CONTACT</p><h1>聊聊合作。</h1>
+    <p>欢迎来信交流你的项目。可以附上项目目标、发布渠道、参考风格和预计交付时间，便于确认制作范围。</p>
+    <div class="contact-box"><div><p class="eyebrow">商务邮箱{site.email.endsWith('@example.com') ? ' · 待替换' : ''}</p><a class="contact-address" href={`mailto:${site.email}`}>{site.email}</a></div><a id="consult" class="button solid" href={`mailto:${site.email}?subject=${encodeURIComponent('项目合作咨询')}`}>发邮件咨询 <span aria-hidden="true">↗</span></a></div>
+    {site.socials.length > 0 ? <nav class="socials" aria-label="社交媒体">{site.socials.map(s => <a class="text-link" href={s.url}>{s.label}</a>)}</nav> : <p class="meta">社交媒体资料待补充。</p>}
+  </section>
+</Base>
+<script>
+  import { services } from '../data/services';
+  document.addEventListener('astro:page-load', () => {
+    const service = services.find(service => service.id === new URLSearchParams(location.search).get('service'));
+    const link = document.querySelector<HTMLAnchorElement>('#consult');
+    if (!service || !link) return;
+    const url = new URL(link.href);
+    url.searchParams.set('subject', `项目合作咨询｜${service.title}`);
+    link.href = url.href.replaceAll('+', '%20');
+  });
+</script>

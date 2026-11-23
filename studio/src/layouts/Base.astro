@@ -1,0 +1,95 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import { nav, site } from '../data/site';
+import '../styles/global.css';
+interface Props { title: string; description?: string; image?: string; dark?: boolean; structured?: Record<string, unknown> }
+const { title, description = site.description, image = '/images/portal.webp', dark = false, structured } = Astro.props;
+const path = Astro.url.pathname;
+const heading = path === '/' ? `${site.name} — ${site.chineseName}` : `${title} | ${site.name}`;
+const canonical = new URL(path, Astro.site ?? Astro.url).href;
+const share = new URL(image, canonical).href;
+const schema = { '@context': 'https://schema.org', '@type': 'WebPage', name: heading, description, url: canonical, ...structured };
+---
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{heading}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonical} />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="alternate" type="application/rss+xml" title="创作日志" href="/rss.xml" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:site_name" content={site.name} />
+  <meta property="og:title" content={heading} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:image" content={share} />
+  <meta property="og:type" content={structured?.['@type'] === 'Article' ? 'article' : 'website'} />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={heading} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={share} />
+  <script type="application/ld+json" set:html={JSON.stringify(schema).replaceAll('<', '\\u003c')} />
+  <script is:inline>document.documentElement.classList.add("js");</script>
+  <ClientRouter />
+</head>
+<body class:list={[dark && 'dark-page']}>
+  <a class="skip" href="#main">跳到主要内容</a>
+  <header class="site-header">
+    <div class="shell topbar">
+      <a class="wordmark" href="/"><span class="mark" aria-hidden="true"></span>{site.name}<span class="mark-period">.</span></a>
+      <button class="mobile-toggle" type="button" aria-expanded="false" aria-controls="navigation" hidden>菜单</button>
+      <nav id="navigation" aria-label="主要导航">
+        {nav.map(({label,href}) => <a href={href} aria-current={path === href ? 'page' : undefined} class:list={[path.startsWith(href) && 'active']}>{label}</a>)}
+        <a class="mobile-contact" href="/contact/">联系</a>
+      </nav>
+      <a class="header-contact" href="/contact/">联系合作 <span aria-hidden="true">↗</span></a>
+    </div>
+  </header>
+  <main id="main"><slot /></main>
+  <footer class="site-footer">
+    <div class="shell">
+      <div class="footer-main">
+        <div><a class="wordmark" href="/"><span class="mark" aria-hidden="true"></span>{site.name}<span class="mark-period">.</span></a><p>{site.chineseName} · 独立影像与视觉创作</p></div>
+        <nav aria-label="页脚导航">{nav.map(({label,href}) => <a href={href}>{label}</a>)}<a href="/contact/">联系</a></nav>
+        <div class="footer-contact"><a href={`mailto:${site.email}`}>{site.email}</a>{site.socials.map(s => <a href={s.url}>{s.label}</a>)}<a href="/rss.xml">订阅 RSS</a></div>
+      </div>
+      <div class="footer-bottom">© {new Date().getFullYear()} {site.name}</div>
+    </div>
+  </footer>
+  <script>
+    document.addEventListener('astro:page-load', () => {
+      document.documentElement.classList.add('js');
+      const button = document.querySelector<HTMLButtonElement>('.mobile-toggle');
+      const header = document.querySelector<HTMLElement>('.site-header');
+      if (button && header) {
+        button.hidden = false;
+        const setOpen = (open: boolean) => {
+          header.classList.toggle('menu-open', open);
+          button.setAttribute('aria-expanded', String(open));
+          button.textContent = open ? '关闭' : '菜单';
+        };
+        button.addEventListener('click', () => setOpen(button.getAttribute('aria-expanded') !== 'true'));
+        header.addEventListener('keydown', event => {
+          if (event.key === 'Escape' && button.getAttribute('aria-expanded') === 'true') {
+            setOpen(false);
+            button.focus();
+          }
+        });
+      }
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
+      const observer = new IntersectionObserver(entries => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          entry.target.classList.add('revealed');
+          observer.unobserve(entry.target);
+        }
+      }, { threshold: 0.08 });
+      document.querySelectorAll('[data-reveal]').forEach(element => observer.observe(element));
+      document.addEventListener('astro:before-swap', () => observer.disconnect(), { once: true });
+    });
+  </script>
+</body>
+</html>

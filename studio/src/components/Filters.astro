@@ -1,0 +1,43 @@
+---
+const { values, all, label } = Astro.props as { values:readonly string[]; all:string; label:string };
+---
+<div data-filter hidden>
+  <div class="filters" role="group" aria-label={label}>
+    <button type="button" data-value="" aria-pressed="true">{all}</button>
+    {values.map(value => <button type="button" data-value={value} aria-pressed="false">{value}</button>)}
+  </div>
+  <p role="status" class="filter-status"></p>
+</div>
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const filter = document.querySelector<HTMLElement>('[data-filter]');
+    if (!filter) return;
+    const buttons = Array.from(filter.querySelectorAll<HTMLButtonElement>('button'));
+    const items = Array.from(document.querySelectorAll<HTMLElement>('[data-filter-item]'));
+    const show = (value: string) => {
+      for (const button of buttons) button.setAttribute('aria-pressed', String(button.dataset.value === value));
+      let count = 0;
+      for (const item of items) {
+        item.hidden = !!value && item.dataset.category !== value && !item.dataset.tags?.split('|').includes(value);
+        if (!item.hidden) count++;
+      }
+      const status = filter.querySelector('[role="status"]');
+      if (status) {
+        status.textContent = count ? `显示 ${count} 项结果` : '此分类暂无内容。';
+        status.classList.toggle('sr-only', count > 0);
+      }
+    };
+    filter.hidden = false;
+    filter.addEventListener('click', event => {
+      const button = (event.target as HTMLElement).closest<HTMLButtonElement>('button[data-value]');
+      if (!button) return;
+      const url = new URL(location.href);
+      if (button.dataset.value) url.searchParams.set('filter', button.dataset.value);
+      else url.searchParams.delete('filter');
+      history.replaceState(history.state, '', url);
+      show(button.dataset.value ?? '');
+    });
+    const requested = new URLSearchParams(location.search).get('filter');
+    show(buttons.some(button => button.dataset.value === requested) ? requested! : '');
+  });
+</script>

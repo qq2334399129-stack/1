@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro';
+import Cover from '../components/Cover.astro';
+import ContactBand from '../components/ContactBand.astro';
+import { site } from '../data/site';
+---
+<Base title="关于" description="了解留帧工作室的创作方向、工作方式和合作流程。">
+  <section class="shell page-heading"><p class="eyebrow">ABOUT</p><h1>关于留帧</h1><p>{site.introduction}</p></section>
+  <section class="shell about-grid">
+    <div class="card-image"><Cover path="images/sphere.webp" alt="雾气与倒影中的半透明球体" priority /></div>
+    <div class="detail-copy stacked"><div><h2>个人介绍</h2><p>{site.bio}</p></div><div><h2>创作经历</h2><p>{site.experience}</p></div><div><h2>专业方向与工具</h2><p>AI 视频、商业广告、漫剧分镜与视觉设计。</p><p>{site.tools}</p></div></div>
+  </section>
+  <section class="shell section detail-copy" data-reveal>
+    <div><h2>创作理念</h2><p>从主题、受众与情绪出发，为每个项目建立一致的画面语言。通过样稿验证方向，再把生成、剪辑和设计接在同一条制作流程里。</p></div>
+    <div><h2>工作与合作方式</h2><p>前期通过邮件交换简报与参考，确认用途、交付物与时间。进入制作后按阶段审阅，收集反馈后完成约定版本。</p><a class="text-link" href="/services/">查看合作服务</a></div>
+  </section>
+  <ContactBand />
+</Base>

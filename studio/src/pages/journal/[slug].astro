@@ -1,0 +1,35 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Cover from '../../components/Cover.astro';
+import JournalCard from '../../components/JournalCard.astro';
+import { journal, dateLabel } from '../../utils/journal';
+import { media } from '../../utils/media';
+export async function getStaticPaths() {
+  const entries = await journal();
+  return entries.map((entry,index) => ({
+    params:{ slug:entry.id },
+    props:{entry, previous:entries[index+1], next:entries[index-1], related:entries.filter(e => e.id !== entry.id).sort((a,b) => Number(b.data.category === entry.data.category) - Number(a.data.category === entry.data.category) || b.data.tags.filter(t => entry.data.tags.includes(t)).length - a.data.tags.filter(t => entry.data.tags.includes(t)).length).slice(0,2)}
+  }));
+}
+const {entry, previous, next, related} = Astro.props;
+const {data} = entry;
+const {Content} = await render(entry);
+const filterURL = (value:string) => `/journal/?filter=${encodeURIComponent(value)}`;
+---
+<Base title={data.title} description={data.description} image={media(data.cover)} structured={{'@type':'Article', headline:data.title, datePublished:dateLabel(data.date), image:new URL(media(data.cover), Astro.site).href}}>
+  <article>
+    <header class="shell page-heading article-heading">
+      <a class="text-link" href="/journal/">全部日志</a>
+      <p class="eyebrow"><a href={filterURL(data.category)}>{data.category}</a> / <time datetime={dateLabel(data.date)}>{dateLabel(data.date)}</time></p><h1>{data.title}</h1><p>{data.description}</p>
+      <ul class="tags">{data.tags.map(tag => <li><a href={filterURL(tag)}>{tag}</a></li>)}</ul>
+    </header>
+    <div class="shell article-cover card-image"><Cover path={data.cover} alt={data.alt} priority /></div>
+    <div class="reading prose"><Content /></div>
+  </article>
+  <nav class="reading article-nav" aria-label="相邻文章">
+    {previous ? <a href={`/journal/${previous.id}/`}><span>上一篇</span>{previous.data.title}</a> : <span></span>}
+    {next && <a href={`/journal/${next.id}/`}><span>下一篇</span>{next.data.title}</a>}
+  </nav>
+  {related.length > 0 && <section class="shell section"><div class="section-heading"><h2>相关文章</h2></div><div class="journal-grid">{related.map(item => <JournalCard entry={item} />)}</div></section>}
+</Base>

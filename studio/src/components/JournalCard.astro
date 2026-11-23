@@ -1,0 +1,15 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Cover from './Cover.astro';
+import { dateLabel } from '../utils/journal';
+const { entry } = Astro.props as { entry: CollectionEntry<'journal'> };
+const { id, data } = entry;
+---
+<article class="journal-card" data-reveal>
+  <a href={`/journal/${id}/`}>
+    <div class="card-image"><Cover path={data.cover} alt={data.alt} /></div>
+    <p class="meta">{data.category} · <time datetime={dateLabel(data.date)}>{dateLabel(data.date)}</time></p>
+    <h3>{data.title}</h3>
+    <p class="card-desc">{data.description}</p>
+  </a>
+</article>

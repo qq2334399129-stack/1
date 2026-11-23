@@ -1,0 +1,9 @@
+---
+import { media } from '../utils/media';
+const { path, alt, priority = false, class: name } = Astro.props as { path: string; alt: string; priority?: boolean; class?: string };
+const responsive = /^images\/(portal|object|city|sphere|product)\.webp$/.test(path);
+const src = media(path);
+---
+<img class={name} src={src} srcset={responsive ? `${media(path.replace('.webp','-480.webp'))} 480w, ${src} 836w` : undefined}
+  sizes={responsive ? (priority ? '(max-width: 720px) 92vw, 1200px' : '(max-width: 720px) 92vw, 640px') : undefined} alt={alt}
+  loading={priority ? 'eager' : 'lazy'} fetchpriority={priority ? 'high' : 'auto'} decoding="async" width="836" height="470" />
