@@ -1,6 +1,6 @@
 'use strict'
 
-const { name, topic, intro, contact, works, skillGroups, services } = window.PORTFOLIO
+const { name, topic, intro, avatar, contact, works, documents = [], skillGroups, services } = window.PORTFOLIO
 const byId = id => document.getElementById(id)
 const element = (tag, className, text) => {
   const node = document.createElement(tag)
@@ -10,6 +10,8 @@ const element = (tag, className, text) => {
 }
 const iconPaths = {
   play: '<path d="m9 6 10 6-10 6z" fill="currentColor" stroke="none"/>',
+  document: '<path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v5h4M8.5 12h6m-6 4h6"/>',
+  next: '<path d="M5 12h14m-6-6 6 6-6 6"/>',
   expand: '<path d="M8 16 16 8M8 8h8v8"/>',
   spark: '<path d="m12 3 2.6 6.4L21 12l-6.4 2.6L12 21l-2.6-6.4L3 12l6.4-2.6L12 3Z"/>',
   tool: '<rect x="5" y="9" width="14" height="11" rx="2"/><path d="M9 9V7a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M5 14h14m-9 0v2m4-2v2"/>',
@@ -27,16 +29,33 @@ function icon(key, className) {
 
 document.title = name + ' · 个人主页'
 document.querySelectorAll('[data-brand]').forEach(node => { node.textContent = name })
-document.querySelector('[data-topic]').textContent = topic
+document.querySelectorAll('[data-topic]').forEach(node => { node.textContent = topic })
 document.querySelector('[data-intro]').textContent = intro
+document.querySelectorAll('[data-initial]').forEach(node => { node.textContent = [...name.trim()].at(-1) || '' })
+document.querySelector('.hero-avatar').setAttribute('aria-label', avatar?.src ? name + (avatar.example ? '的示例头像' : '的头像') : name + '的名字头像')
+byId('avatar-placeholder').hidden = !avatar?.example
+if (avatar?.src) {
+  for (const holder of document.querySelectorAll('[data-avatar]')) {
+    const image = element('img')
+    image.alt = ''
+    image.addEventListener('error', () => image.remove(), { once: true })
+    image.src = avatar.src
+    holder.append(image)
+  }
+}
 
 const dialog = byId('project-dialog')
 const mediaContainer = byId('project-media')
 let opener
-function openMedia(work, source) {
+function showProject(title, description, source) {
   opener = source
-  byId('project-title').textContent = work.title
-  byId('project-description').textContent = (work.description || '') + (work.example ? ' · 作品示例' : '')
+  byId('project-title').textContent = title
+  byId('project-description').textContent = description
+  dialog.showModal()
+  document.body.classList.add('dialog-open')
+  byId('close-dialog').focus()
+}
+function openMedia(work, source) {
   let video
   if (work.type === 'video') {
     video = element('video')
@@ -57,9 +76,8 @@ function openMedia(work, source) {
     img.alt = work.alt
     mediaContainer.replaceChildren(img)
   }
-  dialog.showModal()
-  document.body.classList.add('dialog-open')
-  byId('close-dialog').focus()
+  const description = [work.description, work.example ? '作品示例' : ''].filter(Boolean).join(' · ')
+  showProject(work.title, description, source)
   video?.play().catch(() => {})
 }
 byId('close-dialog').addEventListener('click', () => dialog.close())
@@ -94,6 +112,60 @@ function makeCard(work) {
   card.append(makeCover(work), info)
   return card
 }
+function documentUrl(value) {
+  if (!value) return ''
+  const external = profileUrl(value)
+  if (external) return external
+  try {
+    const url = new URL(value, document.baseURI)
+    if (url.protocol === location.protocol && url.origin === location.origin && !url.username && !url.password) return url.href
+  } catch {}
+  return ''
+}
+function setDocumentLink(link, href) {
+  link.href = href
+  link.target = '_blank'
+  link.rel = 'noopener noreferrer'
+}
+function openDocument(work, href, source) {
+  const article = element('article', 'document-body')
+  for (const section of work.sections) {
+    article.append(element('h3', '', section.title), element('p', '', section.text))
+  }
+  if (href) {
+    const link = element('a', 'button quiet', '打开文档文件 ↗')
+    setDocumentLink(link, href)
+    article.append(link)
+  }
+  mediaContainer.replaceChildren(article)
+  showProject(work.title, work.example ? '文档示例' : '', source)
+}
+const documentList = byId('document-list')
+for (const work of documents) {
+  const href = documentUrl(work.file)
+  const preview = work.sections?.length > 0
+  if (!preview && !href) continue
+  const article = element('article', 'document-item')
+  article.dataset.reveal = ''
+  const card = element(preview ? 'button' : 'a', 'document-card')
+  card.setAttribute('aria-label', (preview ? '阅读 ' : '打开文档 ') + work.title)
+  if (preview) {
+    card.type = 'button'
+    card.addEventListener('click', () => openDocument(work, href, card))
+  } else {
+    setDocumentLink(card, href)
+  }
+  const info = element('span', 'document-info')
+  info.append(element('span', 'document-meta', metaText(work)), element('span', 'document-title', work.title),
+    element('span', 'document-summary', work.description))
+  card.append(icon('document', 'document-icon'), info, icon(href && !preview ? 'expand' : 'next', 'document-arrow'))
+  article.append(card)
+  documentList.append(article)
+}
+const documentCount = documentList.childElementCount
+if (documentCount) byId('document-count').textContent = documentCount + ' 篇文档'
+else documentList.append(element('p', 'section-note', '文档作品将更新在这里。'))
+
 const videos = works.filter(work => work.type === 'video')
 const featured = videos.find(work => work.featured) || videos[0]
 if (featured) {
@@ -127,7 +199,10 @@ for (const group of skillGroups) {
 }
 for (const service of services) {
   const item = element('article', 'service-item')
-  item.append(element('h4', '', service.title), element('p', '', service.description))
+  item.dataset.reveal = ''
+  const summary = element('div')
+  summary.append(element('h3', '', service.title), element('p', '', service.description))
+  item.append(icon(service.icon || 'spark', 'service-icon'), summary)
   byId('service-list').append(item)
 }
 
@@ -150,6 +225,7 @@ function addContact(label, key, description, href, action) {
   if (!href && !action) { node.classList.add('pending'); node.setAttribute('aria-disabled', 'true') }
   const text = element('span', 'contact-text')
   text.append(element('strong', '', label), element('small', '', description))
+  node.dataset.reveal = ''
   node.append(icon(key, 'contact-icon'), text)
   if (href || action) node.append(icon('expand', 'contact-arrow'))
   links.append(node)
@@ -177,52 +253,73 @@ if (contact.email) addContact('邮件', 'email', contact.email, 'mailto:' + cont
 if (contact.phone) addContact('电话', 'phone', contact.phone, 'tel:' + contact.phone.replace(/[^\d+]/g, ''))
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
+const opening = byId('opening')
+const revealItems = [...document.querySelectorAll('[data-reveal]')]
 let revealObserver
-if (!reducedMotion.matches && 'IntersectionObserver' in window) {
-  revealObserver = new IntersectionObserver(entries => {
-    for (const { target, isIntersecting } of entries) {
-      if (!isIntersecting) continue
-      target.classList.remove('reveal-pending')
-      revealObserver.unobserve(target)
-    }
-  }, { rootMargin: '0px 0px 10px 0px' })
-  document.querySelectorAll('[data-reveal]').forEach(target => {
-    target.classList.add('reveal-pending')
-    revealObserver.observe(target)
-  })
+function startReveals() {
+  for (const target of revealItems) revealObserver?.observe(target)
 }
+function finishOpening() {
+  if (opening.hidden) return
+  const hadFocus = opening.contains(document.activeElement)
+  opening.hidden = true
+  document.documentElement.classList.remove('opening')
+  if (hadFocus) byId('profile-title').focus({ preventScroll: true })
+  startReveals()
+}
+if (!reducedMotion.matches) {
+  document.documentElement.classList.add('motion')
+  if ('IntersectionObserver' in window) {
+    revealObserver = new IntersectionObserver(entries => {
+      for (const { target, isIntersecting } of entries) {
+        if (!isIntersecting) continue
+        target.classList.remove('reveal-pending')
+        revealObserver.unobserve(target)
+      }
+    }, { rootMargin: '0px 0px 14px 0px' })
+    for (const target of revealItems) target.classList.add('reveal-pending')
+  }
+  if ((!location.hash || location.hash === '#top') && performance.getEntriesByType('navigation')[0]?.type !== 'back_forward') {
+    document.documentElement.classList.add('opening')
+    opening.hidden = false
+    opening.addEventListener('animationend', event => {
+      if (event.target === opening) finishOpening()
+    })
+    opening.querySelector('button').addEventListener('click', finishOpening)
+    addEventListener('keydown', event => {
+      if (event.key === 'Escape') finishOpening()
+    })
+  } else {
+    startReveals()
+  }
+}
+reducedMotion.addEventListener?.('change', event => {
+  if (!event.matches) return
+  revealObserver?.disconnect()
+  revealObserver = undefined
+  finishOpening()
+  document.documentElement.classList.remove('motion')
+  for (const target of revealItems) target.classList.remove('reveal-pending')
+})
+
 const progress = document.querySelector('.reading-progress')
-const hero = document.querySelector('.hero')
-const stage = document.querySelector('.hero-stage')
 const nav = [...document.querySelectorAll('nav a[href^="#"]')].map(link => [link, document.querySelector(link.hash)])
 let scrollFrame = 0
-let previousScene = -1
 function updateScroll() {
   scrollFrame = 0
   const height = Math.max(1, document.documentElement.scrollHeight - innerHeight)
   const ratio = Math.max(0, Math.min(1, scrollY / height))
-  const travel = Math.max(1, hero.offsetHeight - stage.offsetHeight)
-  const scene = reducedMotion.matches ? 0 : Math.min(1, Math.max(0, scrollY / travel))
   let current = nav[0][0]
   for (const [link, section] of nav.slice(1)) {
-    if (section.getBoundingClientRect().top <= Math.min(225, innerHeight * .34)) current = link
+    if (!section.hidden && section.getBoundingClientRect().top <= Math.min(225, innerHeight * .33)) current = link
   }
-  if (ratio >= .995) {
-    const anchored = nav.find(([link, section]) => {
+  for (const [link, section] of nav.slice(1)) {
+    if (link.hash === location.hash && !section.hidden) {
       const box = section.getBoundingClientRect()
-      return link.hash === location.hash && box.top < innerHeight && box.bottom > 0
-    })
-    current = anchored?.[0] || nav.at(-1)[0]
+      if (box.top >= 0 && box.top <= innerHeight * .55 && box.bottom > 0) current = link
+    }
   }
   progress.style.transform = 'scaleX(' + ratio + ')'
-  if (scene !== previousScene) {
-    previousScene = scene
-    hero.style.setProperty('--scene-inset', (scene * 3) + '%')
-    hero.style.setProperty('--scene-round', (scene * 14) + 'px')
-    hero.style.setProperty('--scene-zoom', 1.025 + scene * .18)
-    hero.style.setProperty('--scene-dark', scene * .36)
-    hero.style.setProperty('--scene-shift', (-scene * 27) + 'px')
-  }
   for (const [link] of nav) {
     if (link === current) link.setAttribute('aria-current', 'location')
     else link.removeAttribute('aria-current')
@@ -234,12 +331,5 @@ function scheduleScroll() {
 addEventListener('scroll', scheduleScroll, { passive: true })
 addEventListener('resize', scheduleScroll)
 addEventListener('hashchange', scheduleScroll)
-reducedMotion.addEventListener?.('change', event => {
-  if (!event.matches) return
-  revealObserver?.disconnect()
-  document.documentElement.classList.remove('motion', 'opening')
-  document.querySelectorAll('.reveal-pending').forEach(node => node.classList.remove('reveal-pending'))
-  scheduleScroll()
-})
 if ('ResizeObserver' in window) new ResizeObserver(scheduleScroll).observe(document.body)
 scheduleScroll()
