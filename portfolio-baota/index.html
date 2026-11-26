@@ -4,61 +4,19 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#10120f">
-  <meta name="description" content="小野的影像、SKU 作品和人物建筑资产。">
+  <meta name="description" content="小野的影像、人物和建筑资产、工具与 Skill。">
   <title>小野 · 个人主页</title>
   <link rel="icon" href="/assets/mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/style.css?v=3">
   <style>
     :root { --home-ease: cubic-bezier(.22, .61, .36, 1); }
 
-    .home-header {
-      position: fixed;
-      inset: 0 0 auto;
-      z-index: 5;
-      padding-top: max(12px, env(safe-area-inset-top));
-      pointer-events: none;
-    }
-
-    .home-nav {
-      justify-content: flex-end;
-      gap: 8px;
-    }
-
-    .home-nav a {
-      pointer-events: auto;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      min-height: 44px;
-      padding: 0 13px;
-      border: 1px solid rgba(255, 255, 255, .23);
-      border-radius: 999px;
-      background: rgba(16, 18, 15, .44);
-      color: #f5f3e9;
-      font-weight: 650;
-      backdrop-filter: blur(10px);
-      transition: background-color .25s var(--home-ease), border-color .25s var(--home-ease),
-        transform .25s var(--home-ease);
-    }
-
-    .home-nav a::after { content: none; }
-    .home-nav a span { color: inherit; margin: 0; }
-    .home-nav svg {
-      width: 16px;
-      height: 16px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 1.35;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
     .index-motion :is(.button, .text-link, .page-link, .carousel-controls button, .dialog-close, .media-cover) {
       transition: transform .25s var(--home-ease), background-color .25s var(--home-ease),
         border-color .25s var(--home-ease), color .25s var(--home-ease);
     }
 
-    .index-motion :is(.home-nav a, .button, .text-link, .page-link, .carousel-controls button:not(:disabled),
+    .index-motion :is(.button, .text-link, .page-link, .carousel-controls button:not(:disabled),
       .dialog-close, .media-cover):active { transform: scale(.96); }
 
     .media-cover img, .media-cover .play-mark {
@@ -66,17 +24,11 @@
     }
 
     @media (hover: hover) {
-      .home-nav a:hover {
-        background-color: rgba(16, 18, 15, .72);
-        border-color: rgba(220, 235, 183, .62);
-      }
-      .index-motion .home-nav a:hover:not(:active) { transform: translateY(-2px); }
       .index-motion .media-cover:hover img { transform: scale(1.035); }
       .index-motion .media-cover:hover .play-mark { transform: scale(1.08); background-color: #253322; }
     }
 
     .index-motion { scroll-behavior: smooth; }
-    .index-motion .home-nav { animation: home-arrive .44s var(--home-ease) both; }
     .index-motion .hero-content, .index-motion .motion .hero-content {
       animation: home-arrive .64s .08s var(--home-ease) both;
     }
@@ -104,18 +56,20 @@
       to { opacity: 1; }
     }
 
-    @media (max-width: 750px) {
-      .home-header { padding-top: max(8px, env(safe-area-inset-top)); }
-      .home-nav { gap: 6px; }
-      .home-nav a { padding-inline: 10px; }
-    }
+    .home-resources { padding-bottom: 32px; }
+    .home-resources .section-head { margin-bottom: 14px; }
+    .tools-empty { display: none; }
+    #tools[hidden] + .tools-empty { display: block; }
+    .tools-empty p { color: var(--muted); font-size: 14px; }
+    .home-skill { margin-top: clamp(32px, 5vw, 54px); }
+    .home-skill-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 12px; }
 
     @media (prefers-reduced-motion: reduce) {
       .index-motion { scroll-behavior: auto; }
       .index-motion [data-home-reveal].home-waiting:not(:focus-within) { opacity: 1; transform: none; }
-      .index-motion :is(.home-nav a, .button, .text-link, .page-link, .carousel-controls button,
+      .index-motion :is(.button, .text-link, .page-link, .carousel-controls button,
         .dialog-close, .media-cover):active { transform: none; }
-      .index-motion .home-nav a:hover:not(:active), .index-motion .media-cover:hover :is(img, .play-mark) {
+      .index-motion .media-cover:hover :is(img, .play-mark) {
         transform: none;
       }
     }
@@ -129,24 +83,6 @@
 </head>
 <body id="top">
   <a class="skip" href="#videos">跳到视频</a>
-  <header class="home-header">
-    <div class="shell">
-      <nav class="home-nav" aria-label="作品导航">
-        <a href="#videos">
-          <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="4" width="15" height="12" rx="2.5"/><path d="m8 7 4.5 3L8 13z"/></svg>
-          <span>视频</span>
-        </a>
-        <a href="/sku/">
-          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.5 17 6v8l-7 3.5L3 14V6zM3 6l7 3.5L17 6M10 9.5v8"/></svg>
-          <span>SKU</span>
-        </a>
-        <a href="/assets-library/">
-          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m2.5 7 7.5-4 7.5 4-7.5 4zm0 3.5 7.5 4 7.5-4m-15 3.5 7.5 4 7.5-4"/></svg>
-          <span>资产</span>
-        </a>
-      </nav>
-    </div>
-  </header>
   <main>
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-stage">
@@ -156,7 +92,7 @@
             <img class="home-avatar" id="avatar" alt="头像" hidden>
             <p class="hero-topic" id="topic">影像、设计与 AI 创作</p>
             <h1 id="hero-title"><span data-brand>小野</span><span class="title-dot" aria-hidden="true">.</span></h1>
-            <p class="hero-description" id="intro">这里放我的影像、SKU 作品和人物／建筑资产。</p>
+            <p class="hero-description" id="intro">这里放我的影像、Skill 和人物／建筑资产。</p>
             <p class="home-services" id="services"></p>
             <div class="hero-actions">
               <a href="#videos" class="button primary">看视频 <span aria-hidden="true">↓</span></a>
@@ -179,20 +115,29 @@
       </div>
     </section>
 
-    <section class="section shell" data-home-reveal aria-label="更多作品">
-      <div class="gallery-links">
-        <a class="tile page-link" href="/sku/"><span id="sku-link">SKU 作品集</span><span aria-hidden="true">↗</span></a>
-        <a class="tile page-link" href="/assets-library/"><span id="assets-link">人物与建筑资产</span><span aria-hidden="true">↗</span></a>
-      </div>
+    <section class="section shell" data-home-reveal aria-label="人物与建筑资产">
+      <a class="tile page-link" href="/assets-library/"><span id="assets-link">人物与建筑资产</span><span aria-hidden="true">↗</span></a>
     </section>
 
-    <section class="section shell" id="tools" data-home-reveal aria-labelledby="tools-title" hidden>
-      <div class="section-head"><h2 id="tools-title">AI 工具分享</h2></div>
-      <div class="gallery-grid" id="tool-list"></div>
+    <section class="section shell home-resources" data-home-reveal aria-label="工具和 Skill">
+      <div id="tools" hidden>
+        <div class="section-head"><h2 id="tools-title">AI 工具分享</h2></div>
+        <div class="gallery-grid" id="tool-list"></div>
+      </div>
+      <div class="tools-empty">
+        <div class="section-head"><h2>工具</h2></div>
+        <p>工具分享待更新。</p>
+      </div>
+
+      <section class="home-skill" aria-labelledby="skill-title">
+        <div class="section-head"><h2 id="skill-title">Skill</h2></div>
+        <p class="section-note" id="skills"></p>
+        <div class="home-skill-actions">
+          <a class="button quiet" href="/sku/"><span id="sku-link" hidden></span>查看 Skill <span aria-hidden="true">↗</span></a>
+          <button type="button" class="text-link" id="skill-contact">联系我 ↗</button>
+        </div>
+      </section>
     </section>
-    <footer class="site-footer shell" data-home-reveal>
-      <p id="skills"></p><button type="button" class="text-link" id="skill-contact">联系我 ↗</button>
-    </footer>
   </main>
   <dialog id="project-dialog" aria-labelledby="project-title">
     <div class="dialog-head"><h2 id="project-title"></h2><button type="button" class="dialog-close" aria-label="关闭">×</button></div>
@@ -200,6 +145,16 @@
     <div id="project-details" class="dialog-details"></div>
   </dialog>
   <script>
+    const homeIntro = document.getElementById('intro');
+    if ('MutationObserver' in window) {
+      const introObserver = new MutationObserver(() => {
+        if (homeIntro.textContent === '这里放我的影像、SKU 作品和人物／建筑资产。') {
+          homeIntro.textContent = '这里放我的影像、Skill 和人物／建筑资产。';
+        }
+      });
+      introObserver.observe(homeIntro, { childList: true });
+    }
+
     if (document.documentElement.classList.contains('index-motion') && 'IntersectionObserver' in window) {
       const observer = new IntersectionObserver(entries => {
         for (const entry of entries) {
