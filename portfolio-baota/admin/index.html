@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>网站后台 · 小野</title>
+  <link rel="icon" href="/assets/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/admin.css?v=3">
+  <script src="/admin.js?v=3" defer></script>
+</head>
+<body>
+  <main class="admin-shell">
+    <header><div><h1>网站后台</h1><a href="/" target="_blank" rel="noopener">查看网站 ↗</a></div><button id="logout" type="button" hidden>退出登录</button></header>
+    <div class="surface" id="connection-status">
+      <h2>检查后台连接</h2>
+      <p class="notice" id="connection-message" role="status">正在连接后台…</p>
+      <p class="hint" id="connection-help" hidden>在宝塔的「网站」中打开此站点设置，选择 PHP 8.1 或以上。网站目录应直接包含 index.html 和 xiaoye-api.php。启用后刷新此页。</p>
+    </div>
+    <form id="setup" class="surface" hidden>
+      <h2>首次设置后台</h2>
+      <p class="hint">在宝塔「文件」打开本站目录，显示隐藏文件，编辑查看 <code>.xiaoye-data/install-key.php</code>。复制 code 后面的安装码。下方密码由你自己设置。</p>
+      <label>安装码<input name="code" autocomplete="off" required></label>
+      <label>设置密码<input name="password" type="password" autocomplete="new-password" minlength="12" maxlength="72" required></label>
+      <button class="primary" type="submit">完成设置</button>
+      <p class="notice" id="setup-status" role="status"></p>
+    </form>
+    <form id="login" class="surface" hidden>
+      <h2>管理员登录</h2>
+      <label>用户名<input name="username" autocomplete="username" value="admin" required></label>
+      <label>密码<input name="password" type="password" autocomplete="current-password" required></label>
+      <button class="primary" type="submit">登录</button>
+      <p class="notice" id="login-status" role="status"></p>
+    </form>
+    <div id="dashboard" hidden>
+      <nav id="sections" aria-label="后台栏目"></nav>
+      <div class="publish-bar">
+        <p id="status" class="notice" role="status"></p>
+        <button type="button" class="primary" id="save">保存并发布</button>
+      </div>
+      <div id="editor"></div>
+    </div>
+  </main>
+</body>
+</html>

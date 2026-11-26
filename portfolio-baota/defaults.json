@@ -1,0 +1,27 @@
+{
+  "name": "小野",
+  "topic": "影像、设计与 AI 创作",
+  "intro": "这里放我的影像、SKU 作品和人物／建筑资产。",
+  "avatar": "assets/mark.svg",
+  "hero": "assets/ridge.webp",
+  "heroAlt": "晨光中的山脊与远处的人影",
+  "services": "AI 网站定制、AI 视频定制、AI 图片定制、AI 订阅服务、有偿教学与 AI 工具分享",
+  "skillText": "需要 Skill 或想了解有偿教学，欢迎联系我。",
+  "subscriptionLabel": "AI 订阅网站",
+  "subscriptionUrl": "",
+  "videoTitle": "视频放映室",
+  "skuTitle": "SKU 作品集",
+  "skuIntro": "这里展示 SKU 设计、商品视觉与项目说明。",
+  "assetTitle": "人物与建筑资产",
+  "assetIntro": "点开封面查看效果图、制作说明和提示词。",
+  "toolsTitle": "AI 工具分享",
+  "contact": {"qqUrl":"","wechatUrl":"","email":"","qqQr":"","wechatQr":""},
+  "videos": [
+    {"title":"赤色通道","category":"影像实验 · 示例","description":"一段关于颜色和空间的练习。只留一束红光，让人物剪影成为镜头的中心。","cover":"assets/red.webp","video":"assets/red-study.mp4"}
+  ],
+  "sku": [],
+  "assets": [
+    {"title":"雾中建筑","category":"建筑资产 · 示例","image":"assets/moss.webp","description":"通过长阶梯、石材质感和散射光表现空间的纵深。这是示例效果图。","prompt":"雾中的深绿色石质建筑，中央长阶梯，低饱和冷色，漫射晨光，前景保留清晰的石材纹理，远处建筑逐渐没入雾中。","file":""}
+  ],
+  "tools": []
+}
