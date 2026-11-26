@@ -1,6 +1,6 @@
 'use strict'
 
-const { name, topic, intro, avatar, contact, works, documents = [], skillGroups, services } = window.PORTFOLIO
+const { name, topic, intro, avatar, contact, works, skillGroups, services } = window.PORTFOLIO
 const byId = id => document.getElementById(id)
 const element = (tag, className, text) => {
   const node = document.createElement(tag)
@@ -10,8 +10,6 @@ const element = (tag, className, text) => {
 }
 const iconPaths = {
   play: '<path d="m9 6 10 6-10 6z" fill="currentColor" stroke="none"/>',
-  document: '<path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v5h4M8.5 12h6m-6 4h6"/>',
-  next: '<path d="M5 12h14m-6-6 6 6-6 6"/>',
   expand: '<path d="M8 16 16 8M8 8h8v8"/>',
   spark: '<path d="m12 3 2.6 6.4L21 12l-6.4 2.6L12 21l-2.6-6.4L3 12l6.4-2.6L12 3Z"/>',
   tool: '<rect x="5" y="9" width="14" height="11" rx="2"/><path d="M9 9V7a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M5 14h14m-9 0v2m4-2v2"/>',
@@ -33,7 +31,6 @@ document.querySelectorAll('[data-topic]').forEach(node => { node.textContent = t
 document.querySelector('[data-intro]').textContent = intro
 document.querySelectorAll('[data-initial]').forEach(node => { node.textContent = [...name.trim()].at(-1) || '' })
 document.querySelector('.hero-avatar').setAttribute('aria-label', avatar?.src ? name + (avatar.example ? '的示例头像' : '的头像') : name + '的名字头像')
-byId('avatar-placeholder').hidden = !avatar?.example
 if (avatar?.src) {
   for (const holder of document.querySelectorAll('[data-avatar]')) {
     const image = element('img')
@@ -51,6 +48,7 @@ function showProject(title, description, source) {
   opener = source
   byId('project-title').textContent = title
   byId('project-description').textContent = description
+  byId('project-description').hidden = !description
   dialog.showModal()
   document.body.classList.add('dialog-open')
   byId('close-dialog').focus()
@@ -76,12 +74,16 @@ function openMedia(work, source) {
     img.alt = work.alt
     mediaContainer.replaceChildren(img)
   }
-  const description = [work.description, work.example ? '作品示例' : ''].filter(Boolean).join(' · ')
+  const description = work.description || ''
   showProject(work.title, description, source)
   video?.play().catch(() => {})
 }
 byId('close-dialog').addEventListener('click', () => dialog.close())
-dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close() })
+dialog.addEventListener('click', event => {
+  if (event.target !== dialog) return
+  const { left, right, top, bottom } = dialog.getBoundingClientRect()
+  if (event.clientX < left || event.clientX > right || event.clientY < top || event.clientY > bottom) dialog.close()
+})
 dialog.addEventListener('close', () => {
   mediaContainer.querySelector('video')?.pause()
   mediaContainer.replaceChildren()
@@ -89,103 +91,38 @@ dialog.addEventListener('close', () => {
   opener?.focus()
 })
 
-function makeCover(work, featured = false) {
-  const video = work.type === 'video'
-  const cover = element('button', 'media-cover' + (featured ? ' featured-cover' : ''))
+function makeVideoCard(work, featured) {
+  const card = element('article', 'video-card' + (featured ? ' video-feature' : ''))
+  card.dataset.reveal = ''
+  const cover = element('button', 'media-cover' + (work.aspect === 'portrait' ? ' portrait-cover' : ''))
   cover.type = 'button'
-  cover.setAttribute('aria-label', (video ? '播放视频 ' : '查看图片 ') + work.title)
+  cover.setAttribute('aria-label', '预览视频 ' + work.title)
   const img = element('img')
   img.src = work.cover
   img.alt = work.alt
   img.loading = 'lazy'
   img.decoding = 'async'
-  cover.append(img, icon(video ? 'play' : 'expand', 'media-action'))
+  cover.append(img, icon('play', 'media-action'))
   cover.addEventListener('click', () => openMedia(work, cover))
-  return cover
-}
-const metaText = work => work.category + (work.example ? ' · 示例' : '')
-function makeCard(work) {
-  const card = element('article', 'media-card')
-  card.dataset.reveal = ''
-  const info = element('div', 'media-meta')
-  info.append(element('h3', '', work.title), element('span', '', metaText(work)))
-  card.append(makeCover(work), info)
+
+  const details = element('div', 'video-details')
+  const topic = [work.category, work.example ? '示例' : ''].filter(Boolean).join(' · ')
+  details.append(element('p', 'video-category', topic), element('h3', '', work.title))
+  if (work.description) details.append(element('p', 'video-summary', work.description))
+  card.append(cover, details)
   return card
 }
-function documentUrl(value) {
-  if (!value) return ''
-  const external = profileUrl(value)
-  if (external) return external
-  try {
-    const url = new URL(value, document.baseURI)
-    if (url.protocol === location.protocol && url.origin === location.origin && !url.username && !url.password) return url.href
-  } catch {}
-  return ''
-}
-function setDocumentLink(link, href) {
-  link.href = href
-  link.target = '_blank'
-  link.rel = 'noopener noreferrer'
-}
-function openDocument(work, href, source) {
-  const article = element('article', 'document-body')
-  for (const section of work.sections) {
-    article.append(element('h3', '', section.title), element('p', '', section.text))
-  }
-  if (href) {
-    const link = element('a', 'button quiet', '打开文档文件 ↗')
-    setDocumentLink(link, href)
-    article.append(link)
-  }
-  mediaContainer.replaceChildren(article)
-  showProject(work.title, work.example ? '文档示例' : '', source)
-}
-const documentList = byId('document-list')
-for (const work of documents) {
-  const href = documentUrl(work.file)
-  const preview = work.sections?.length > 0
-  if (!preview && !href) continue
-  const article = element('article', 'document-item')
-  article.dataset.reveal = ''
-  const card = element(preview ? 'button' : 'a', 'document-card')
-  card.setAttribute('aria-label', (preview ? '阅读 ' : '打开文档 ') + work.title)
-  if (preview) {
-    card.type = 'button'
-    card.addEventListener('click', () => openDocument(work, href, card))
-  } else {
-    setDocumentLink(card, href)
-  }
-  const info = element('span', 'document-info')
-  info.append(element('span', 'document-meta', metaText(work)), element('span', 'document-title', work.title),
-    element('span', 'document-summary', work.description))
-  card.append(icon('document', 'document-icon'), info, icon(href && !preview ? 'expand' : 'next', 'document-arrow'))
-  article.append(card)
-  documentList.append(article)
-}
-const documentCount = documentList.childElementCount
-if (documentCount) byId('document-count').textContent = documentCount + ' 篇文档'
-else documentList.append(element('p', 'section-note', '文档作品将更新在这里。'))
 
 const videos = works.filter(work => work.type === 'video')
 const featured = videos.find(work => work.featured) || videos[0]
+const videoList = byId('video-list')
 if (featured) {
-  const feature = element('article', 'video-feature')
-  feature.dataset.reveal = ''
-  const details = element('div', 'feature-details')
-  details.append(element('span', 'feature-category', metaText(featured)), element('h3', '', featured.title),
-    element('p', '', featured.description))
-  feature.append(makeCover(featured, true), details)
-  byId('video-list').append(feature)
+  videoList.append(makeVideoCard(featured, true))
+  for (const work of videos) if (work !== featured) videoList.append(makeVideoCard(work, false))
   byId('video-count').textContent = videos.length + ' 部视频'
-  if (videos.length > 1) {
-    const more = element('div', 'more-videos')
-    more.append(...videos.filter(work => work !== featured).map(makeCard))
-    byId('video-list').append(more)
-  }
-} else byId('video-list').append(element('p', 'section-note', '视频作品将更新在这里。'))
-const photos = works.filter(work => work.type === 'image')
-byId('photo-list').append(...photos.map(makeCard))
-if (photos.length === 0) byId('photos').hidden = true
+} else {
+  videoList.append(element('p', 'section-note', '视频作品将更新在这里。'))
+}
 
 for (const group of skillGroups) {
   const article = element('article', 'skill-group')
@@ -198,12 +135,7 @@ for (const group of skillGroups) {
   byId('toolkit').append(article)
 }
 for (const service of services) {
-  const item = element('article', 'service-item')
-  item.dataset.reveal = ''
-  const summary = element('div')
-  summary.append(element('h3', '', service.title), element('p', '', service.description))
-  item.append(icon(service.icon || 'spark', 'service-icon'), summary)
-  byId('service-list').append(item)
+  byId('service-list').append(element('li', '', service.title))
 }
 
 function profileUrl(value) {
@@ -224,8 +156,8 @@ function addContact(label, key, description, href, action) {
   }
   if (!href && !action) { node.classList.add('pending'); node.setAttribute('aria-disabled', 'true') }
   const text = element('span', 'contact-text')
-  text.append(element('strong', '', label), element('small', '', description))
-  node.dataset.reveal = ''
+  text.append(element('strong', '', label), element('small', 'sr-only', description))
+  node.title = description
   node.append(icon(key, 'contact-icon'), text)
   if (href || action) node.append(icon('expand', 'contact-arrow'))
   links.append(node)
@@ -238,15 +170,14 @@ else if (contact.wechatQr) addContact('微信', 'wechat', '查看微信二维码
   openMedia({ type: 'image', title: '微信二维码', qr: true, media: contact.wechatQr,
     alt: '用于添加联系人的微信二维码', description: '用微信扫一扫打开。' }, source)
 })
-else if (contact.wechat) addContact('微信', 'wechat', '复制微信号', '', async source => {
-  const note = source.querySelector('small')
+else if (contact.wechat) addContact('微信', 'wechat', '复制微信号', '', async () => {
+  const note = byId('copy-status')
   try {
     await navigator.clipboard.writeText(contact.wechat)
     note.textContent = '微信号已复制'
   } catch {
-    note.textContent = contact.wechat
+    note.textContent = '微信号：' + contact.wechat
   }
-  byId('copy-status').textContent = note.textContent
 })
 else addContact('微信', 'wechat', '主页待添加', '')
 if (contact.email) addContact('邮件', 'email', contact.email, 'mailto:' + contact.email)
@@ -301,35 +232,3 @@ reducedMotion.addEventListener?.('change', event => {
   document.documentElement.classList.remove('motion')
   for (const target of revealItems) target.classList.remove('reveal-pending')
 })
-
-const progress = document.querySelector('.reading-progress')
-const nav = [...document.querySelectorAll('nav a[href^="#"]')].map(link => [link, document.querySelector(link.hash)])
-let scrollFrame = 0
-function updateScroll() {
-  scrollFrame = 0
-  const height = Math.max(1, document.documentElement.scrollHeight - innerHeight)
-  const ratio = Math.max(0, Math.min(1, scrollY / height))
-  let current = nav[0][0]
-  for (const [link, section] of nav.slice(1)) {
-    if (!section.hidden && section.getBoundingClientRect().top <= Math.min(225, innerHeight * .33)) current = link
-  }
-  for (const [link, section] of nav.slice(1)) {
-    if (link.hash === location.hash && !section.hidden) {
-      const box = section.getBoundingClientRect()
-      if (box.top >= 0 && box.top <= innerHeight * .55 && box.bottom > 0) current = link
-    }
-  }
-  progress.style.transform = 'scaleX(' + ratio + ')'
-  for (const [link] of nav) {
-    if (link === current) link.setAttribute('aria-current', 'location')
-    else link.removeAttribute('aria-current')
-  }
-}
-function scheduleScroll() {
-  if (!scrollFrame) scrollFrame = requestAnimationFrame(updateScroll)
-}
-addEventListener('scroll', scheduleScroll, { passive: true })
-addEventListener('resize', scheduleScroll)
-addEventListener('hashchange', scheduleScroll)
-if ('ResizeObserver' in window) new ResizeObserver(scheduleScroll).observe(document.body)
-scheduleScroll()

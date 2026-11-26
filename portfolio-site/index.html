@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f4f6fb">
-  <meta name="description" content="小野的个人主页，收录创作文档、视频、图片和合作联系方式。">
+  <meta name="description" content="小野的个人主页，收录视频作品、技能工具和合作联系方式。">
   <title>小野 · 个人主页</title>
   <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
@@ -23,68 +23,36 @@
     </div>
     <button class="entry-skip" type="button">跳过开场</button>
   </div>
-  <a class="skip" href="#documents">跳到作品</a>
-  <header class="site-header">
-    <div class="shell header-inner">
-      <a href="#top" class="brand"><span class="brand-mark" aria-hidden="true"></span><span data-brand>小野</span></a>
-      <nav aria-label="主导航">
-        <a href="#top" aria-current="location">主页</a>
-        <a href="#documents">文档</a>
-        <a href="#videos">视频</a>
-        <a href="#photos">图片</a>
-      </nav>
-      <a class="header-contact" href="#contact">联系<span aria-hidden="true"> ↗</span></a>
-    </div>
-    <div class="reading-progress" aria-hidden="true"></div>
-  </header>
-
+  <a class="skip" href="#videos">跳到视频作品</a>
   <main class="shell">
-    <section class="profile" aria-labelledby="profile-title">
-      <div class="profile-card">
-        <div class="profile-visual" data-intro-step>
-          <div class="avatar hero-avatar" data-avatar role="img" aria-label="小野的头像"><span data-initial>野</span></div>
-          <span class="avatar-placeholder" id="avatar-placeholder">示例头像</span>
-        </div>
+    <section class="profile-card" aria-labelledby="profile-title">
+      <div class="profile-lead" data-intro-step>
         <div class="profile-copy">
-          <p class="profile-topic" data-topic data-intro-step>影像、设计与 AI 实验</p>
-          <h1 id="profile-title" tabindex="-1" data-intro-step>你好，我是<span class="profile-name"><span data-brand>小野</span><span class="hero-dot">。</span></span></h1>
-          <p class="profile-description" data-intro data-intro-step>这里放我的影像作品和创作笔记。喜欢把一个念头，慢慢试成一段看得见的画面。</p>
-          <a class="button primary" href="#documents" data-intro-step>浏览作品 <span aria-hidden="true">↓</span></a>
+          <p class="profile-topic" data-topic>影像、设计与 AI 实验</p>
+          <h1 id="profile-title" tabindex="-1" data-brand>小野</h1>
+          <p class="profile-description" data-intro>做视频剪辑、视觉设计和 AI 影像。</p>
         </div>
+        <div class="avatar hero-avatar" data-avatar role="img" aria-label="小野的示例头像"><span data-initial>野</span></div>
       </div>
 
-      <div class="profile-details">
-        <section class="detail-panel" aria-labelledby="services-title">
-          <h2 id="services-title" data-reveal>我能提供的服务</h2>
-          <div id="service-list" class="service-list"></div>
-        </section>
-        <section class="detail-panel contact-panel" id="contact" aria-labelledby="contact-title">
-          <h2 id="contact-title" data-reveal>联系方式</h2>
-          <div id="contact-links" class="contact-links"></div>
-          <p class="sr-only" id="copy-status" role="status"></p>
-        </section>
-      </div>
+      <section class="profile-row" id="contact" aria-labelledby="contact-title" data-intro-step>
+        <h2 id="contact-title">联系方式</h2>
+        <div id="contact-links" class="contact-links"></div>
+        <p class="section-note contact-feedback" id="copy-status" role="status"></p>
+      </section>
+      <section class="profile-row" aria-labelledby="services-title" data-intro-step>
+        <h2 id="services-title">我能提供的服务</h2>
+        <ul id="service-list" class="service-list"></ul>
+      </section>
+      <a class="button primary" href="#videos" data-intro-step>浏览作品 <span aria-hidden="true">↓</span></a>
     </section>
 
-    <section class="section" id="documents" aria-labelledby="documents-title">
+    <section class="section" id="videos" tabindex="-1" aria-labelledby="videos-title">
       <div class="section-head" data-reveal>
-        <h2 id="documents-title">文档作品集</h2>
-        <p class="section-note" id="document-count"></p>
-      </div>
-      <div class="document-grid" id="document-list"></div>
-    </section>
-    <section class="section" id="videos" aria-labelledby="videos-title">
-      <div class="section-head" data-reveal>
-        <h2 id="videos-title">视频作品</h2>
+        <h2 id="videos-title">视频作品集</h2>
         <p class="section-note" id="video-count"></p>
       </div>
-      <div id="video-list"></div>
-    </section>
-    <section class="section" id="photos" aria-labelledby="photos-title">
-      <div class="section-head" data-reveal>
-        <h2 id="photos-title">图片作品</h2>
-      </div>
-      <div class="photo-grid" id="photo-list"></div>
+      <div class="video-grid" id="video-list"></div>
     </section>
     <section class="section" id="skills" aria-labelledby="skills-title">
       <div class="section-head" data-reveal>
@@ -94,10 +62,7 @@
     </section>
   </main>
 
-  <footer class="site-footer shell" data-reveal>
-    <p><span data-brand>小野</span> · 个人主页</p>
-    <a href="#top">回到顶部 <span aria-hidden="true">↑</span></a>
-  </footer>
+  <footer class="site-footer shell"><a href="#top">回到顶部 <span aria-hidden="true">↑</span></a></footer>
 
   <dialog id="project-dialog" aria-labelledby="project-title">
     <div class="dialog-head">
