@@ -8,7 +8,7 @@ const crypto = require('node:crypto')
 const { isIP } = require('node:net')
 const { Transform } = require('node:stream')
 const { pipeline } = require('node:stream/promises')
-const defaults = require('./defaults.json')
+const defaults = require('./public/defaults.json')
 
 const dataDir = path.resolve(process.env.DATA_DIR || path.join(__dirname, 'data'))
 const uploadDir = path.join(dataDir, 'uploads')
@@ -18,10 +18,14 @@ const port = Number(process.env.PORT || 3000)
 const host = process.env.HOST || '127.0.0.1'
 const hours = 8 * 60 * 60 * 1000
 const mediaId = /^[a-f0-9-]{36}\.(?:jpg|png|webp|gif|mp4|webm|bin)$/
-const mime = { jpg:'image/jpeg', png:'image/png', webp:'image/webp', gif:'image/gif', svg:'image/svg+xml', mp4:'video/mp4', webm:'video/webm', bin:'application/octet-stream', html:'text/html; charset=utf-8', css:'text/css; charset=utf-8', js:'text/javascript; charset=utf-8' }
+const mime = { jpg:'image/jpeg', png:'image/png', webp:'image/webp', gif:'image/gif', svg:'image/svg+xml', mp4:'video/mp4', webm:'video/webm', bin:'application/octet-stream', json:'application/json; charset=utf-8', html:'text/html; charset=utf-8', css:'text/css; charset=utf-8', js:'text/javascript; charset=utf-8' }
 const staticFiles = new Map([
-  ['/','index.html'], ['/sku','gallery.html'], ['/assets-library','gallery.html'], ['/admin','admin.html'],
+  ['/','index.html'], ['/index.html','index.html'],
+  ['/sku','sku/index.html'], ['/sku/','sku/index.html'], ['/sku/index.html','sku/index.html'],
+  ['/assets-library','assets-library/index.html'], ['/assets-library/','assets-library/index.html'], ['/assets-library/index.html','assets-library/index.html'],
+  ['/admin','admin/index.html'], ['/admin/','admin/index.html'], ['/admin/index.html','admin/index.html'], ['/admin.html','admin/index.html'],
   ['/style.css','style.css'], ['/app.js','app.js'], ['/admin.js','admin.js'], ['/admin.css','admin.css'],
+  ['/defaults.json','defaults.json'],
   ['/assets/mark.svg','assets/mark.svg'], ['/assets/ridge.webp','assets/ridge.webp'], ['/assets/red.webp','assets/red.webp'],
   ['/assets/red-study.mp4','assets/red-study.mp4'], ['/assets/moss.webp','assets/moss.webp']
 ])
@@ -332,6 +336,7 @@ async function route(req, res) {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
   res.setHeader('X-Frame-Options', 'DENY')
   res.setHeader('Content-Security-Policy', "default-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'")
+  if (method === 'GET' && pathname === '/api/health') return json(res,200,{ service:'xiaoye-portfolio', status:'ok' })
   if (method === 'GET' && pathname === '/api/content') return json(res,200,publicContent())
   if (method === 'POST' && pathname === '/api/login') return login(req,res)
   if (method === 'POST' && pathname === '/api/logout') {
@@ -347,7 +352,7 @@ async function route(req, res) {
   if (method === 'PUT' && pathname === '/api/upload') return upload(req,res,current.searchParams.get('kind'))
   if (method === 'GET' || method === 'HEAD') {
     const filename = staticFiles.get(pathname)
-    if (filename) return serve(req,res,path.join(__dirname,filename),path.extname(filename).slice(1),'no-cache')
+    if (filename) return serve(req,res,path.join(__dirname,'public',filename),path.extname(filename).slice(1),'no-cache')
     const uploaded = pathname.startsWith('/media/') && pathname.slice(7)
     if (uploaded && mediaId.test(uploaded)) {
       if (!publishedMedia.has(uploaded) && !session(req)) fail(404,'文件不存在。')

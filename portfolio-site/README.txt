@@ -1,11 +1,12 @@
 小野个人网站 · 宝塔部署说明
 
 这个版本包含前台、/admin 后台、/sku 作品副页和 /assets-library 人物与建筑资产副页。
+public 是唯一可作为纯静态预览的目录。修改、上传和保存需要运行 Node 项目。
 需要运行 Node.js 22 或以上。站点由 Node 提供页面和上传接口，无需数据库，无需 npm install。
 
 首次部署
 1. 在宝塔新建单独的网站目录，例如 /www/wwwroot/xiaoye。上传 ZIP 后解压，确认 server.cjs、
-   package.json、index.html 和 assets 目录在同一级。不要把 data 目录作为静态网站发布。
+   package.json 和 public 目录在同一级。不要将项目根目录或 data 作为静态站点目录。
 2. 在宝塔终端进入该目录，使用 Node.js 22 或以上执行：
       npm run init
    终端会显示用户名 admin 和随机密码，只显示一次。请保存密码。
@@ -15,7 +16,18 @@
 4. 将域名通过宝塔反向代理转发到 http://127.0.0.1:3000，项目端口不必开放到公网。
    开启 HTTPS，并将真实请求协议传递给 Node。反向代理的 location / 可参考附件
    nginx-location.txt，把实际端口替换进去。若已有宝塔生成的 location /，请替换原块。
-5. 打开 https://你的域名/admin 登录。路径以域名根目录为准，例如 /sku 和 /assets-library。
+5. 打开 https://你的域名/api/health。看到含有 "service":"xiaoye-portfolio" 的 JSON，
+   再访问同一域名的 /admin 登录。使用实际绑定到这个作品集的域名。
+6. 如果以前上传过静态版，可更新项目文件并重启 Node，已有 data 目录保留。
+   打开反向代理后，旧的静态首页不会被使用。
+
+排查 404 或跳到其他网站
+- 在宝塔终端执行 curl -fsS http://127.0.0.1:3000/api/health。端口改过时换成实际端口。
+- 本机命令连接失败时，检查 Node 项目是否在运行、工作目录、运行用户和端口。
+- 本机命令成功，但域名的 /api/health 返回 404、HTML 或其他网站，检查宝塔该站点绑定的
+  域名、DNS、HTTPS 站点和反向代理。请求 /、/api/、/admin 和 /media/ 都由同一项目处理。
+- 如果暂时只想看前台，可将宝塔的静态站点根目录指到 public。此时可看到默认山景、
+  示例视频与两个副页。/admin/ 会提示 Node 连接状态，登录与保存待反向代理接通后可用。
 
 后台位置
 - 首页介绍：名字、头像、山景封面、开头服务说明、Skill 联系说明、AI 订阅网站跳转链接。

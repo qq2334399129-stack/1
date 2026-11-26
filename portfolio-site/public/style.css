@@ -207,3 +207,5 @@ dialog::backdrop { background: #0b0f0bea; }
 @media (prefers-reduced-motion:reduce) {
   *,*::before,*::after { animation:none!important; transition:none!important; }
 }
+
+.preview-status { padding-block: 14px; color: var(--muted); font-size: 12px; }

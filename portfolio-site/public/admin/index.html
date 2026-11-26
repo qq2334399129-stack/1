@@ -6,12 +6,17 @@
   <meta name="robots" content="noindex,nofollow">
   <title>网站后台 · 小野</title>
   <link rel="icon" href="/assets/mark.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/admin.css">
-  <script src="/admin.js" defer></script>
+  <link rel="stylesheet" href="/admin.css?v=2">
+  <script src="/admin.js?v=2" defer></script>
 </head>
 <body>
   <main class="admin-shell">
     <header><div><h1>网站后台</h1><a href="/" target="_blank" rel="noopener">查看网站 ↗</a></div><button id="logout" type="button" hidden>退出登录</button></header>
+    <div class="surface" id="connection-status">
+      <h2>检查后台连接</h2>
+      <p class="notice" id="connection-message" role="status">正在连接后台…</p>
+      <p class="hint" id="connection-help" hidden>在宝塔启动 Node 项目，把这个域名反向代理到它的端口。直接访问 <a href="/api/health">后台状态接口</a>，应返回 xiaoye-portfolio。部署命令见压缩包内 README.txt。</p>
+    </div>
     <form id="login" class="surface" hidden>
       <h2>管理员登录</h2>
       <label>用户名<input name="username" autocomplete="username" value="admin" required></label>

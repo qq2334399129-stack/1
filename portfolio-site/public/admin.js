@@ -66,7 +66,11 @@ async function request(path, method = 'GET', data) {
   if (path === '/api/login') headers['X-Admin-Request'] = '1'
   const response = await fetch(path,{ method, headers, body:data ? JSON.stringify(data) : undefined })
   const result = await response.json().catch(()=>({}))
-  if (!response.ok) throw Error(result.error || '操作失败，请重试。')
+  if (!response.ok) {
+    const error = Error(result.error || '请求失败（HTTP ' + response.status + '）。')
+    error.status = response.status
+    throw error
+  }
   return result
 }
 function upload(file, kind, progress) {
@@ -240,6 +244,7 @@ async function start() {
   csrf = data.csrf
   version = data.version
   content = data.content
+  byId('connection-status').hidden = true
   byId('login').hidden = true
   byId('dashboard').hidden = false
   byId('logout').hidden = false
@@ -284,4 +289,21 @@ addEventListener('beforeunload',event=>{
   event.preventDefault()
   event.returnValue = true
 })
-start().catch(()=>{ byId('login').hidden = false })
+async function connect() {
+  try {
+    const response = await fetch('/api/health',{ cache:'no-store', signal:globalThis.AbortSignal?.timeout?.(5000) })
+    if (!response.ok) throw Error('未接通 Node 后台（HTTP ' + response.status + '）。')
+    const health = await response.json().catch(()=>null)
+    if (health?.service !== 'xiaoye-portfolio') throw Error('这个域名指向了其他服务，未接通作品集后台。')
+    try { await start() }
+    catch (error) {
+      if (error.status !== 401) throw error
+      byId('connection-status').hidden = true
+      byId('login').hidden = false
+    }
+  } catch (error) {
+    byId('connection-message').textContent = error.name === 'TimeoutError' || error instanceof TypeError ? '无法连接 Node 后台，请检查站点代理。' : error.message
+    byId('connection-help').hidden = false
+  }
+}
+connect()

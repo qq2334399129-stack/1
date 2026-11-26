@@ -146,7 +146,8 @@ function renderVideos(rows) {
 function renderHome(data) {
   for (const key of ['topic','intro','services','skills']) byId(key).textContent = key === 'skills' ? data.skillText : data[key]
   const hero = byId('hero-photo')
-  if (data.hero) { hero.src = data.hero; hero.alt = data.heroAlt; hero.hidden = false }
+  if (data.hero) { hero.src = data.hero; hero.alt = data.heroAlt }
+  else hero.hidden = true
   const avatar = byId('avatar')
   if (data.avatar) { avatar.src = data.avatar; avatar.alt = data.name + '的头像'; avatar.hidden = false }
   const sub = byId('subscription')
@@ -170,7 +171,7 @@ function renderHome(data) {
   if (motion.matches) document.body.classList.add('motion')
 }
 function renderGallery(data) {
-  const sku = location.pathname === '/sku'
+  const sku = /^\/sku(?:\/|$)/.test(location.pathname)
   const title = sku ? data.skuTitle : data.assetTitle
   const rows = sku ? data.sku : data.assets
   document.title = title + ' · ' + data.name
@@ -195,13 +196,24 @@ function renderGallery(data) {
     byId('gallery').append(card)
   }
 }
-async function init() {
-  const response = await fetch('/api/content')
-  if (!response.ok) throw Error('页面暂时无法加载。')
+async function getContent(path) {
+  const response = await fetch(path,{ cache:'no-store', signal:globalThis.AbortSignal?.timeout?.(5000) })
+  if (!response.ok) throw Error('读取失败')
   const data = await response.json()
+  if (typeof data?.name !== 'string' || !data?.contact ||
+    !['videos','sku','assets','tools'].every(key=>Array.isArray(data[key]))) throw Error('内容格式不正确')
+  return data
+}
+async function init() {
+  let data
+  try { data = await getContent('/api/content') }
+  catch {
+    data = await getContent('/defaults.json')
+    document.querySelector('main').append(element('p','shell preview-status','当前显示示例内容。'))
+  }
   document.title = data.name + ' · 个人主页'
   for (const node of document.querySelectorAll('[data-brand]')) node.textContent = data.name
   if (byId('video-list')) renderHome(data)
   else renderGallery(data)
 }
-init().catch(()=>document.querySelector('main').prepend(element('p','section-note shell','内容暂时无法加载，请刷新页面。')))
+init().catch(()=>document.querySelector('main').append(element('p','shell preview-status','内容暂时无法加载，请刷新页面。')))
