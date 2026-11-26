@@ -1,0 +1,8 @@
+{
+  "name": "xiaoye-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mobile-first portfolio with a local management panel",
+  "scripts": {"start": "node server.cjs", "init": "node server.cjs --init", "reset-password": "node server.cjs --reset-password"},
+  "engines": {"node": ">=22"}
+}

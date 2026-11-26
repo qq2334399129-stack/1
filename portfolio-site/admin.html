@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>网站后台 · 小野</title>
+  <link rel="icon" href="/assets/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/admin.css">
+  <script src="/admin.js" defer></script>
+</head>
+<body>
+  <main class="admin-shell">
+    <header><div><h1>网站后台</h1><a href="/" target="_blank" rel="noopener">查看网站 ↗</a></div><button id="logout" type="button" hidden>退出登录</button></header>
+    <form id="login" class="surface" hidden>
+      <h2>管理员登录</h2>
+      <label>用户名<input name="username" autocomplete="username" value="admin" required></label>
+      <label>密码<input name="password" type="password" autocomplete="current-password" required></label>
+      <button class="primary" type="submit">登录</button>
+      <p class="notice" id="login-status" role="status"></p>
+    </form>
+    <div id="dashboard" hidden>
+      <nav id="sections" aria-label="后台栏目"></nav>
+      <div class="publish-bar">
+        <p id="status" class="notice" role="status"></p>
+        <button type="button" class="primary" id="save">保存并发布</button>
+      </div>
+      <div id="editor"></div>
+    </div>
+  </main>
+</body>
+</html>
