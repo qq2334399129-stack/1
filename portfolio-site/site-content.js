@@ -2,15 +2,14 @@
 window.PORTFOLIO = {
   name: '小野',
   topic: '影像、设计与 AI 实验',
-  intro: '在这里分享我的影像作品，也接剪辑、设计和 AI 影像创作。',
+  intro: '在这里分享我的影像作品，也提供 AI 内容与个人网站定制。',
   avatar: { src: 'assets/avatar.webp', example: true },
   contact: {
-    qqUrl: '',        // 自己从 QQ 分享出的官方主页或联系链接，以 https:// 开头
-    wechatUrl: '',    // 自己从微信分享出的公开主页链接，以 https:// 开头
+    qqUrl: '',        // 填写 QQ 官方 HTTPS 分享链接或有效的 QQ App 跳转链接
+    wechatUrl: '',    // 填写微信官方 HTTPS 分享链接或有效的微信 App 跳转链接
     wechatQr: '',     // 没有微信主页链接时可填 assets/wechat-qr.png
     wechat: '',       // 可选，公开微信号。有主页链接时优先跳主页
-    email: '',
-    phone: ''
+    email: ''       // 填公开邮箱，页面会直接显示地址
   },
   works: [
     {
@@ -25,13 +24,10 @@ window.PORTFOLIO = {
       description: '一段关于颜色和空间的练习。只留一束红光，让人物的剪影成为镜头的中心。'
     }
   ],
-  skillGroups: [
-    { title: '创作方向', icon: 'spark', items: ['视频剪辑', '视觉设计', 'AI 影像'] },
-    { title: '工具箱 · 示例', icon: 'tool', items: ['剪映', 'DaVinci Resolve', 'Photoshop', '即梦 AI', '豆包 Seedance'] }
-  ],
   services: [
-    { title: '视频剪辑与包装' },
-    { title: '视觉设计' },
-    { title: 'AI 影像创作' }
+    { title: 'AI 订阅会员', description: '按使用需求选择合适的 AI 会员方案。' },
+    { title: 'AI 视频定制', description: '根据脚本、风格与使用场景制作视频。' },
+    { title: 'AI 图片定制', description: '按主题与尺寸制作封面、海报或视觉素材。' },
+    { title: '个人网站定制', description: '设计适合手机和电脑的个人主页与作品集。' }
   ]
 }

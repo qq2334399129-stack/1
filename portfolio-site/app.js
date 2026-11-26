@@ -1,6 +1,6 @@
 'use strict'
 
-const { name, topic, intro, avatar, contact, works, skillGroups, services } = window.PORTFOLIO
+const { name, topic, intro, avatar, contact, works, services } = window.PORTFOLIO
 const byId = id => document.getElementById(id)
 const element = (tag, className, text) => {
   const node = document.createElement(tag)
@@ -11,12 +11,9 @@ const element = (tag, className, text) => {
 const iconPaths = {
   play: '<path d="m9 6 10 6-10 6z" fill="currentColor" stroke="none"/>',
   expand: '<path d="M8 16 16 8M8 8h8v8"/>',
-  spark: '<path d="m12 3 2.6 6.4L21 12l-6.4 2.6L12 21l-2.6-6.4L3 12l6.4-2.6L12 3Z"/>',
-  tool: '<rect x="5" y="9" width="14" height="11" rx="2"/><path d="M9 9V7a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M5 14h14m-9 0v2m4-2v2"/>',
   qq: '<path d="M12 3c-2.8 0-4.7 2.1-4.7 5.6 0 1.6-.6 3-1.8 4.6-.8 1.2-.4 2.5 1.1 2.2l.4-.1a7.3 7.3 0 0 0 1.2 2.9c-1 .2-1.6.9-1.6 1.5 0 .9 1.4 1.3 2.6 1.3 1 0 2-.2 2.8-.7.8.5 1.8.7 2.8.7 1.2 0 2.6-.4 2.6-1.3 0-.6-.6-1.3-1.6-1.5a7.3 7.3 0 0 0 1.2-2.9l.4.1c1.5.3 1.9-1 1.1-2.2a7.5 7.5 0 0 1-1.8-4.6C16.7 5.1 14.8 3 12 3Z"/><path d="M10 8.8h.1m3.8 0h.1m-3 3h2"/>',
   wechat: '<path d="M11 17c-1.2.1-2.4 0-3.5-.4L4 18l.8-2.8C3 14 2 12.3 2 10.3 2 6.8 5.4 4 9.5 4c3.7 0 6.8 2.2 7.4 5.1M22 15c0 2.9-2.7 5-5.7 5-1 0-2-.2-2.8-.6l-2.9 1.1.7-2.3a4.6 4.6 0 0 1-1.3-3.3c0-2.8 2.7-5 6-5s6 2.2 6 5.1Z"/><path d="M7 9.5h.1m4.8 0h.1m2.3 4.8h.1m3.6 0h.1"/>',
-  email: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/>',
-  phone: '<path d="M8 4H5a1 1 0 0 0-1 1c0 8 7 15 15 15a1 1 0 0 0 1-1v-3l-4-2-2 2c-3-1-5-3-6-6l2-2-2-4Z"/>'
+  email: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/>'
 }
 function icon(key, className) {
   const node = element('span', className)
@@ -94,22 +91,26 @@ dialog.addEventListener('close', () => {
 function makeVideoCard(work, featured) {
   const card = element('article', 'video-card' + (featured ? ' video-feature' : ''))
   card.dataset.reveal = ''
-  const cover = element('button', 'media-cover' + (work.aspect === 'portrait' ? ' portrait-cover' : ''))
-  cover.type = 'button'
-  cover.setAttribute('aria-label', '预览视频 ' + work.title)
+  const button = element('button', 'video-button')
+  button.type = 'button'
+  button.setAttribute('aria-label', '预览视频 ' + work.title)
+
+  const cover = element('span', 'media-cover' + (work.aspect === 'portrait' ? ' portrait-cover' : ''))
   const img = element('img')
   img.src = work.cover
-  img.alt = work.alt
+  img.alt = work.alt || ''
   img.loading = 'lazy'
   img.decoding = 'async'
   cover.append(img, icon('play', 'media-action'))
-  cover.addEventListener('click', () => openMedia(work, cover))
 
-  const details = element('div', 'video-details')
+  const details = element('span', 'video-details')
   const topic = [work.category, work.example ? '示例' : ''].filter(Boolean).join(' · ')
-  details.append(element('p', 'video-category', topic), element('h3', '', work.title))
-  if (work.description) details.append(element('p', 'video-summary', work.description))
-  card.append(cover, details)
+  if (topic) details.append(element('span', 'video-category', topic))
+  details.append(element('strong', 'video-title', work.title))
+  if (work.description) details.append(element('span', 'video-summary', work.description))
+  button.append(cover, details)
+  button.addEventListener('click', () => openMedia(work, button))
+  card.append(button)
   return card
 }
 
@@ -124,24 +125,19 @@ if (featured) {
   videoList.append(element('p', 'section-note', '视频作品将更新在这里。'))
 }
 
-for (const group of skillGroups) {
-  const article = element('article', 'skill-group')
-  article.dataset.reveal = ''
-  const header = element('div', 'skill-head')
-  header.append(icon(group.icon, 'skill-icon'), element('h3', '', group.title))
-  const tags = element('ul', 'skill-tags')
-  for (const item of group.items) tags.append(element('li', '', item))
-  article.append(header, tags)
-  byId('toolkit').append(article)
-}
+const serviceList = byId('service-list')
 for (const service of services) {
-  byId('service-list').append(element('li', '', service.title))
+  const card = element('article', 'service-card')
+  card.dataset.reveal = ''
+  card.append(element('h3', '', service.title))
+  if (service.description) card.append(element('p', '', service.description))
+  serviceList.append(card)
 }
 
-function profileUrl(value) {
+function profileUrl(value, schemes) {
   try {
     const url = new URL(value)
-    return url.protocol === 'https:' && !url.username && !url.password ? url.href : ''
+    return (url.protocol === 'https:' || schemes.includes(url.protocol)) && !url.username && !url.password ? url.href : ''
   } catch { return '' }
 }
 const links = byId('contact-links')
@@ -162,8 +158,8 @@ function addContact(label, key, description, href, action) {
   if (href || action) node.append(icon('expand', 'contact-arrow'))
   links.append(node)
 }
-const qq = profileUrl(contact.qqUrl)
-const wechat = profileUrl(contact.wechatUrl)
+const qq = profileUrl(contact.qqUrl, ['mqqapi:', 'mqqwpa:'])
+const wechat = profileUrl(contact.wechatUrl, ['weixin:'])
 addContact('QQ', 'qq', qq ? '打开 QQ 主页或会话' : '主页待添加', qq)
 if (wechat) addContact('微信', 'wechat', '打开微信主页', wechat)
 else if (contact.wechatQr) addContact('微信', 'wechat', '查看微信二维码', '', source => {
@@ -180,8 +176,9 @@ else if (contact.wechat) addContact('微信', 'wechat', '复制微信号', '', a
   }
 })
 else addContact('微信', 'wechat', '主页待添加', '')
-if (contact.email) addContact('邮件', 'email', contact.email, 'mailto:' + contact.email)
-if (contact.phone) addContact('电话', 'phone', contact.phone, 'tel:' + contact.phone.replace(/[^\d+]/g, ''))
+const email = contact.email?.trim()
+if (email) addContact(email, 'email', '发送邮件', 'mailto:' + email)
+else addContact('邮箱待填写', 'email', '邮箱地址待添加', '')
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
 const opening = byId('opening')
